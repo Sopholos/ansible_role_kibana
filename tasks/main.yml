@@ -1,0 +1,3 @@
+---
+- name: install | via docker image
+  include_tasks: docker_image.yml

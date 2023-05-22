@@ -1,0 +1,42 @@
+---
+- name: install | set_fact kibana_config_path
+  set_fact:
+    kibana_config_path: "{{ kibana_config_path }}"
+    kibana_container_config_path: "/home/kibana/config/kibana.yml"
+  vars:
+    kibana_config_path: "/etc/kibana/{{ docker_container_name }}/kibana.yml"
+
+- name: install | make sure destination config dir exists
+  file:
+    path: "{{ kibana_config_path | dirname }}"
+    mode: 755
+    state: directory
+
+- name: install | template configuration file to kibana.yml
+  template:
+    src: kibana.yml.j2
+    dest: "{{ kibana_config_path }}"
+    mode: 755
+  register: kibana_config
+
+- name: install | deploy kibana docker container
+  docker_container:
+    name: "{{ docker_container_name }}"
+    image: "kibana:{{ kibana_tag }}"
+    restart_policy: always
+    state: started
+    user: "{{ kibana_user }}"
+    ports:
+      - "{{ kibana_port }}:{{ kibana_port }}"
+    env:
+      JAVA_OPTS: "-Dspring.config.additional-location={{ kibana_container_config_path }}"
+    volumes:
+      - "{{ kibana_config_path | dirname }}:{{ kibana_container_config_path | dirname }}:ro"
+
+- name: install | restart on config change
+  docker_container:
+    name: "{{ docker_container_name }}"
+    state: started
+    restart: true
+  when: kibana_config is defined and kibana_config.changed
+

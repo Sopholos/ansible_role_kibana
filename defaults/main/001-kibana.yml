@@ -1,0 +1,23 @@
+---
+kibana_host: localhost
+kibana_port: 5601
+kibana_user: root
+
+kibana_config:
+  elasticsearch:
+    hosts: "{{ kibana_clusters }}"
+    sniffInterval: 60000
+    sniffOnConnectionFault: true
+  # spring:
+  #   jmx:
+  #     enabled: true
+  server:
+    host: "{{ kibana_host }}"
+    port: "{{ kibana_port }}"  
+  
+  
+# # Узлы кластера Elasticsearch
+# elasticsearch.hosts:
+#   - http://10.0.3.11:9200
+#   - http://10.0.3.12:9200
+#   - http://10.0.3.13:9200
